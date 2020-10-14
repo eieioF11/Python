@@ -1,0 +1,4 @@
+@startuml{plantuml_act_base2.png}
+"処理1" --> "処理2"
+
+@enduml
