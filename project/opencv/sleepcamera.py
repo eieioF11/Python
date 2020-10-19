@@ -7,15 +7,16 @@ import serial
 #ser = serial.Serial('/dev/tty.',115200,timeout=None)
 # カメラをキャプチャする
 cap = cv2.VideoCapture(0) # 0はカメラのデバイス番号
+#cap = cv2.VideoCapture(1) # USBカメラ1
 
 ret, frame = cap.read()
-grayold = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)#BGR(青、緑、赤)をRGB(赤、緑、青)の順番に入れ替える   
+grayold = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)#BGR(青、緑、赤)をRGB(赤、緑、青)の順番に入れ替える
 gray = cv2.flip(grayold, 1)
 
 
 while(True):
     ret, frame = cap.read()
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)#BGR(青、緑、赤)をRGB(赤、緑、青)の順番に入れ替える   
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)#BGR(青、緑、赤)をRGB(赤、緑、青)の順番に入れ替える
 
     #画像左右反転
     frame = cv2.flip(frame, 1)
@@ -38,7 +39,7 @@ while(True):
     #白色の部分が全体のどれくらいの割合を占めているのかを算出
     val=whitePixels / fgmask.size * 100
     #print(time.time())
-    print(val) 
+    print(val)
 
     grayold = gray
 
