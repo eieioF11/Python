@@ -5,6 +5,7 @@ import serial
 
 #Serial
 #ser = serial.Serial('/dev/tty.',115200,timeout=None)
+ser = serial.Serial('com6',115200,timeout=None)
 # カメラをキャプチャする
 cap = cv2.VideoCapture(0) # 0はカメラのデバイス番号
 #cap = cv2.VideoCapture(1) # USBカメラ1
@@ -13,6 +14,15 @@ ret, frame = cap.read()
 grayold = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)#BGR(青、緑、赤)をRGB(赤、緑、青)の順番に入れ替える
 gray = cv2.flip(grayold, 1)
 
+now=time.time()
+old=time.time()
+start=time.time()
+
+flag1=False
+flag2=False
+t=0
+rem=0
+nonrem=0
 
 while(True):
     ret, frame = cap.read()
@@ -38,8 +48,26 @@ while(True):
 
     #白色の部分が全体のどれくらいの割合を占めているのかを算出
     val=whitePixels / fgmask.size * 100
-    #print(time.time())
-    print(val)
+    if val>0 and not flag1:
+        flag1=True
+    else:
+        if val==0 and flag1:
+            now=time.time()
+            t=now-old
+            flag1=False
+            flag2=False
+        else:
+            if val==0:
+                now=time.time()
+                nonrem+=now-start
+    if flag1:
+        if not flag2:
+            old=time.time()
+            flag2=True
+    line = ser.readline()
+    rem+=t
+    t=0
+    print("rem:"+str(rem)+"nonrem:"+str(nonrem)+":"+str(val)+"/"+str(line))
 
     grayold = gray
 
@@ -47,5 +75,6 @@ while(True):
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
+ser.close()
 cap.release()# キャプチャを解放する
 cv2.destroyAllWindows()
