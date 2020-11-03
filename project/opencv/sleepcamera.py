@@ -1,11 +1,11 @@
 import numpy as np
 import cv2
-import time
+import time, datetime
 import serial
 
 #Serial
 #ser = serial.Serial('/dev/tty.',115200,timeout=None)
-ser = serial.Serial('com6',115200,timeout=None)
+#ser = serial.Serial('com6',115200,timeout=None)
 # カメラをキャプチャする
 cap = cv2.VideoCapture(0) # 0はカメラのデバイス番号
 #cap = cv2.VideoCapture(1) # USBカメラ1
@@ -23,6 +23,7 @@ flag2=False
 t=0
 rem=0
 nonrem=0
+line=''
 
 while(True):
     ret, frame = cap.read()
@@ -48,6 +49,8 @@ while(True):
 
     #白色の部分が全体のどれくらいの割合を占めているのかを算出
     val=whitePixels / fgmask.size * 100
+    
+    #rem nonrem time
     if val>0 and not flag1:
         flag1=True
     else:
@@ -60,21 +63,29 @@ while(True):
             if val==0:
                 now=time.time()
                 nonrem+=now-start
+                start=now
     if flag1:
         if not flag2:
             old=time.time()
             flag2=True
-    line = ser.readline()
+            
+    #line = ser.readline()
     rem+=t
     t=0
-    print("rem:"+str(rem)+"nonrem:"+str(nonrem)+":"+str(val)+"/"+str(line))
-
+    #send usb serial
+    #dispray
+    td_rem = datetime.timedelta(seconds=rem)
+    td_nonrem = datetime.timedelta(seconds=nonrem)
+    print("(rem:"+str(td_rem)+",nonrem:"+str(td_nonrem)+"):"+str(val)+"/"+str(line))
+    
+    #other
     grayold = gray
 
     #キーボードのｑキーが押されたらwhileから抜ける
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-ser.close()
+#end processing
+#ser.close()
 cap.release()# キャプチャを解放する
 cv2.destroyAllWindows()
