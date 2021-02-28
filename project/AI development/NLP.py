@@ -38,9 +38,9 @@ while True:
         words = output.splitlines()#文字列を改行で分割する
         print(output)#形態素解析の結果表示
 
-        #split_text = split_text_only_noun(sentence)
-        #print("split_text")
-        #print(split_text)
+        split_text = split_text_only_noun(sentence)
+        print("split_text")
+        print(split_text)
 
         wordlist = []
         #単語リスト作成
