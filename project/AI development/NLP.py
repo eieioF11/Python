@@ -8,6 +8,18 @@ mecab = MeCab.Tagger()
 #mecab = MeCab.Tagger("-Owakati")
 #mecab = MeCab.Tagger("-Ochasen")
 
+# MeCab による単語への分割関数 (名詞のみ残す)
+def split_text_only_noun(text):
+    tagger = MeCab.Tagger()
+
+    words = []
+    for c in tagger.parse(text).splitlines()[:-1]:
+        surface, feature = c.split('\t')
+        pos = feature.split(',')[0]
+        if pos == '名詞':
+            words.append(surface)
+    return ' '.join(words)
+
 while True:
     print("Say something ...")
 
@@ -25,6 +37,10 @@ while True:
 
         words = output.splitlines()#文字列を改行で分割する
         print(output)#形態素解析の結果表示
+
+        #split_text = split_text_only_noun(sentence)
+        #print("split_text")
+        #print(split_text)
 
         wordlist = []
         #単語リスト作成
