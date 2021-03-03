@@ -74,6 +74,7 @@ while True:
         #print(split_text)
 
         splitlist = split_text.split()
+        #場所の選択
         if split_text.count("天気")>=1:
             City="Tokyo"
             for w in splitlist:
@@ -92,7 +93,7 @@ while True:
                     City="hirosima"
                 elif w=="埼玉":
                     City="saitama"
-            getweather(City)
+            getweather(City)#天気取得
 
         # "ストップ" と言ったら音声認識を止める
         if sentence.find('ストップ') != -1 :
