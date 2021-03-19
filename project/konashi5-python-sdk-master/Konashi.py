@@ -393,23 +393,43 @@ class Konashi:
                     b.extend(bytearray([(i<<4)|(control[1])]))
         await self._ble_client.write_gatt_char(KONASHI_UUID_CONTROL_CMD, b)
 
-
 if __name__ == "__main__":
     async def main():
+        global button
+        button=0
         k = Konashi(name="ksAB1A08")
+        #k = Konashi(name="ksAB0FF5")
         await k.connect(5)
         print("Connected")
         await asyncio.sleep(3)
         def pin_change_cb(pin, val):
-            print("Pin {}: {}".format(pin, val))
+            global button
+            button=1
+            print("Pin {}: {} {}".format(pin, val,button))
         k.gpioSetInputCallback(pin_change_cb)
-        await k.gpioConfigSet([(0x01,True,KonashiGpioPinConfig(KONASHI_GPIO_DIRECTION_IN,send_on_change=True)), (0x1E,True,KonashiGpioPinConfig(KONASHI_GPIO_DIRECTION_OUT,send_on_change=False))])
+        #await k.gpioConfigSet([(0x01,True,KonashiGpioPinConfig(KONASHI_GPIO_DIRECTION_IN,send_on_change=True)), (0x1E,True,KonashiGpioPinConfig(KONASHI_GPIO_DIRECTION_OUT,send_on_change=False))])
+        await k.gpioConfigSet([(0x80,True,KonashiGpioPinConfig(KONASHI_GPIO_DIRECTION_IN,send_on_change=True)), (0x1E,True,KonashiGpioPinConfig(KONASHI_GPIO_DIRECTION_OUT,send_on_change=False))])
         await asyncio.sleep(1)
-        await k.gpioControl([(0x14,KONASHI_GPIO_LEVEL_LOW), (0x0A,KONASHI_GPIO_LEVEL_HIGH)])
-        for i in range(10):
+
+        #await k.gpioControl([(0x00,KONASHI_GPIO_LEVEL_LOW), (0x1E,KONASHI_GPIO_LEVEL_HIGH)])
+
+        j=0
+        for i in range(50):
+            print(button)
+            await k.gpioControl([(~(j<<1),KONASHI_GPIO_LEVEL_LOW), (j<<1,KONASHI_GPIO_LEVEL_HIGH)])
+            if button:
+                j+=1
+                button=0
+            if j>15:
+                j=0
             await asyncio.sleep(1)
-            await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_TOGGLE)])
+           # await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_TOGGLE)])
+
+        await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_LOW)])
+        await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_HIGH)])
         await asyncio.sleep(2)
+        await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_LOW)])
+
         await k.disconnect()
         print("Disconnected")
         await asyncio.sleep(2)
