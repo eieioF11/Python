@@ -537,11 +537,17 @@ class Konashi:
 
 if __name__ == "__main__":
     async def main():
-        k = Konashi(name="ksAB0FE8")
+        global button
+        button=0
+
+        k = Konashi(name="ksAB1A08") 
+        #k = Konashi(name="ksAB0FF0") 
         await k.connect(5)
         print("Connected")
         await asyncio.sleep(0.5)
         def pin_change_cb(pin, val):
+            global button
+            button=1
             print("Pin {}: {}".format(pin, val))
         def temperature_cb(temp):
             print("Temperature:", temp)
@@ -562,12 +568,25 @@ if __name__ == "__main__":
         await k.builtinSetPresenceCallback(presence_cb)
         await k.builtinSetAccelGyroCallback(accelgyro_cb)
         await asyncio.sleep(1)
-        await k.gpioControl([(0x14,KONASHI_GPIO_LEVEL_LOW), (0x0A,KONASHI_GPIO_LEVEL_HIGH)])
-        for i in range(40):
-            await asyncio.sleep(1)
-            await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_TOGGLE)])
+
+        i=j=0
+        button=0
+        while(True):
+            print(button,i)
+            await k.gpioControl([(~(j<<1),KONASHI_GPIO_LEVEL_LOW), (j<<1,KONASHI_GPIO_LEVEL_HIGH)])
+            j+=1
+            if j>15:
+                j=0
+            #await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_TOGGLE)])
             await k.builtinSetRgb(255 if i%3==0 else 0, 255 if i%3==1 else 0, 255 if i%3==2 else 0, 255, 1000)
+            await asyncio.sleep(1)     
+            i+=1
+            if button:
+                break
+        await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_LOW)])
+        await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_HIGH)])
         await asyncio.sleep(2)
+        await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_LOW)])     
         await k.disconnect()
         print("Disconnected")
         await asyncio.sleep(2)
