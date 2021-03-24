@@ -10,6 +10,9 @@ from typing import *
 
 from bleak import *
 
+from line_notify_bot import LINENotifyBot
+import random
+
 
 KONASHI_ADV_SERVICE_UUID = "064d0100-8251-49d9-b6f3-f7ba35e5d0a1"
 
@@ -539,22 +542,46 @@ if __name__ == "__main__":
     async def main():
         global button
         button=0
+        global Temp
+        global Hum 
+        global Press
+        def pressuretom(P):
+            P0=1022.72
+            return ((pow((P0/P),(1/5.257))-1)*(Temp+273.15))/0.0065
+        def WBGT(T,H):
+            return 0.725*T+0.0368*H+0.00364*T*H-3.246
+
+        bot = LINENotifyBot(access_token='UilHhgEr7klUFPxhWyHdxYrJDbomRgXxLWeeNJsFyqY')
 
         k = Konashi(name="ksAB1A08") 
         #k = Konashi(name="ksAB0FF0") 
         await k.connect(5)
         print("Connected")
+
+        bot.send(
+            message="Start up!",
+            sticker_package_id=1,
+            sticker_id=12,
+            )
+
         await asyncio.sleep(0.5)
         def pin_change_cb(pin, val):
             global button
-            button=1
+            if pin==0 and val==1:
+                button=1
             print("Pin {}: {}".format(pin, val))
         def temperature_cb(temp):
-            print("Temperature:", temp)
+            global Temp
+            Temp=temp
+            #print("Temperature:", temp)
         def humidity_cb(hum):
-            print("Humidity:", hum)
+            global Hum
+            Hum=hum
+            #print("Humidity:", hum)
         def pressure_cb(press):
-            print("Pressure:", press)
+            global Press
+            Press=press
+            #print("Pressure:", press)
         def presence_cb(pres):
             print("Presence:", pres)
         def accelgyro_cb(accel, gyro):
@@ -571,11 +598,41 @@ if __name__ == "__main__":
 
         i=j=0
         button=0
+        stickerID=5
         while(True):
-            print(button,i)
+            #print(button,i)
             await k.gpioControl([(~(j<<1),KONASHI_GPIO_LEVEL_LOW), (j<<1,KONASHI_GPIO_LEVEL_HIGH)])
             j+=1
             if j>15:
+                comment=""
+                h=pressuretom(Press)
+                wbgt=WBGT(Temp,Hum)
+                if wbgt>31:#危険
+                    comment="危険 熱中症に注意！外出はなるべく避けよう"
+                    stickerID=6
+                elif wbgt>28:#厳重警戒
+                    comment="厳重警戒 熱中症に注意！炎天下はなるべく避けよう"
+                    stickerID=3
+                elif wbgt>25:#警戒
+                    comment="警戒　運動や激しい作業をする際はこまめに休憩しよう"
+                    stickerID=8
+                elif wbgt>21:#注意
+                    comment="注意　激しい運動や重労働時は熱中症に気をつけよう"
+                    stickerID=17
+                elif Hum>50 or Press <1000:#雨？
+                    comment="雨かも"
+                    stickerID=9
+                else:#ほぼ安全
+                    comment="快適～♪"
+                    sticker=[2,5,13]
+                    rnum=random.randint(0,2)
+                    stickerID=sticker[rnum]
+                
+                bot.send(
+                    message="\n"+comment+"\n気温 "+str(Temp)+"[℃]\n湿度 "+str(Hum)+"[%]\n気圧 "+str(Press)+"[hPa]\nWBGT "+str(round(wbgt,2))+"[℃]\n標高 約"+str(round(h,1))+"[m]",
+                    sticker_package_id=1,
+                    sticker_id=stickerID,
+                    )
                 j=0
             #await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_TOGGLE)])
             await k.builtinSetRgb(255 if i%3==0 else 0, 255 if i%3==1 else 0, 255 if i%3==2 else 0, 255, 1000)
@@ -583,12 +640,20 @@ if __name__ == "__main__":
             i+=1
             if button:
                 break
+
         await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_LOW)])
         await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_HIGH)])
         await asyncio.sleep(2)
         await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_LOW)])     
         await k.disconnect()
+
         print("Disconnected")
+        bot.send(
+            message="Shutdown!",            
+            sticker_package_id=1,
+            sticker_id=1,
+            )
+        
         await asyncio.sleep(2)
 
     logging.basicConfig(level=logging.INFO)
