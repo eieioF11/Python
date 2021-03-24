@@ -221,7 +221,7 @@ class Konashi:
 
     def __ne__(self, other):
         return not self.__eq__(other)
-        
+
 
     @staticmethod
     async def find(name: str, timeout: float) -> Konashi:
@@ -541,10 +541,10 @@ class Konashi:
 if __name__ == "__main__":
     async def main():
         global button
-        button=0
         global Temp
-        global Hum 
+        global Hum
         global Press
+
         def pressuretom(P):
             P0=1022.72
             return ((pow((P0/P),(1/5.257))-1)*(Temp+273.15))/0.0065
@@ -553,8 +553,8 @@ if __name__ == "__main__":
 
         bot = LINENotifyBot(access_token='UilHhgEr7klUFPxhWyHdxYrJDbomRgXxLWeeNJsFyqY')
 
-        k = Konashi(name="ksAB1A08") 
-        #k = Konashi(name="ksAB0FF0") 
+        k = Konashi(name="ksAB1A08")
+        #k = Konashi(name="ksAB0FF0")
         await k.connect(5)
         print("Connected")
 
@@ -588,7 +588,7 @@ if __name__ == "__main__":
             print("Accel:", accel)
             print("Gyro:", gyro)
         k.gpioSetInputCallback(pin_change_cb)
-        await k.gpioConfigSet([(0x01,True,KonashiGpioPinConfig(KONASHI_GPIO_DIRECTION_IN,send_on_change=True)), (0x1E,True,KonashiGpioPinConfig(KONASHI_GPIO_DIRECTION_OUT,send_on_change=False))])
+        await k.gpioConfigSet([(0x81,True,KonashiGpioPinConfig(KONASHI_GPIO_DIRECTION_IN,send_on_change=True)), (0x1E,True,KonashiGpioPinConfig(KONASHI_GPIO_DIRECTION_OUT,send_on_change=False))])
         await k.builtinSetTemperatureCallback(temperature_cb)
         await k.builtinSetHumidityCallback(humidity_cb)
         await k.builtinSetPressureCallback(pressure_cb)
@@ -627,16 +627,15 @@ if __name__ == "__main__":
                     sticker=[2,5,13]
                     rnum=random.randint(0,2)
                     stickerID=sticker[rnum]
-                
+
                 bot.send(
                     message="\n"+comment+"\n気温 "+str(Temp)+"[℃]\n湿度 "+str(Hum)+"[%]\n気圧 "+str(Press)+"[hPa]\nWBGT "+str(round(wbgt,2))+"[℃]\n標高 約"+str(round(h,1))+"[m]",
                     sticker_package_id=1,
                     sticker_id=stickerID,
                     )
                 j=0
-            #await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_TOGGLE)])
             await k.builtinSetRgb(255 if i%3==0 else 0, 255 if i%3==1 else 0, 255 if i%3==2 else 0, 255, 1000)
-            await asyncio.sleep(1)     
+            await asyncio.sleep(1)
             i+=1
             if button:
                 break
@@ -644,16 +643,16 @@ if __name__ == "__main__":
         await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_LOW)])
         await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_HIGH)])
         await asyncio.sleep(2)
-        await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_LOW)])     
+        await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_LOW)])
         await k.disconnect()
 
         print("Disconnected")
         bot.send(
-            message="Shutdown!",            
+            message="Shutdown!",
             sticker_package_id=1,
             sticker_id=1,
             )
-        
+
         await asyncio.sleep(2)
 
     logging.basicConfig(level=logging.INFO)
