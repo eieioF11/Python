@@ -556,6 +556,9 @@ if __name__ == "__main__":
             return ((pow((P0/P),(1/5.257))-1)*(Temp+273.15))/0.0065
         def WBGT(T,H):
             return 0.725*T+0.0368*H+0.00364*T*H-3.246
+        def map(x,in_min,in_max,out_min,out_max):
+            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
 
         bot = LINENotifyBot(access_token='UilHhgEr7klUFPxhWyHdxYrJDbomRgXxLWeeNJsFyqY')
 
@@ -621,6 +624,9 @@ if __name__ == "__main__":
         Home=True
         Alert=False
         prei=i
+        R=255
+        G=255
+        B=255
         while(True):
 
             if Presence:
@@ -632,7 +638,17 @@ if __name__ == "__main__":
                             sticker_id=stickerID,
                             )
                         SendFlag=True
-                    await k.builtinSetRgb(255,255,255, 255, 1000)
+                        R=int(map(Temp,0,45,0,255))
+                        B=int(map(Hum,0,100,0,255))
+                        G=int(map(Press,870,1400,0,255))#観測記録　min 870 max 1093.0[hPa]
+                        if R>255:
+                            R=255
+                        if B>255:
+                            B=255
+                        if G>255:
+                            G=255
+                        print(R,G,B)
+                    await k.builtinSetRgb(R,G,B, 255, 1000)
                 else:
                     if SendFlag ==False:
                         bot.send(
@@ -709,7 +725,9 @@ if __name__ == "__main__":
                             sticker_package_id=1,
                             sticker_id=13,
                             )
+                    Alert=False
                     ButtonFlag=False
+                    Buttoncount=0
             await asyncio.sleep(1)
 
         await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_LOW)])
