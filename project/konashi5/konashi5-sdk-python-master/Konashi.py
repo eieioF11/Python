@@ -545,8 +545,14 @@ if __name__ == "__main__":
         global Hum
         global Press
 
+        global Accel
+        global Gyro
+
+        global Presence
+
         def pressuretom(P):
-            P0=1022.72
+            #P0=1022.72
+            P0=1013.15
             return ((pow((P0/P),(1/5.257))-1)*(Temp+273.15))/0.0065
         def WBGT(T,H):
             return 0.725*T+0.0368*H+0.00364*T*H-3.246
@@ -569,6 +575,8 @@ if __name__ == "__main__":
             global button
             if pin==0 and val==1:
                 button=1
+            elif pin==0 and val==0:
+                button=0
             print("Pin {}: {}".format(pin, val))
         def temperature_cb(temp):
             global Temp
@@ -582,13 +590,19 @@ if __name__ == "__main__":
             global Press
             Press=press
             #print("Pressure:", press)
-        def presence_cb(pres):
+        def presence_cb(pres):#人感センサー
+            global Presence
+            Presence=pres
             print("Presence:", pres)
         def accelgyro_cb(accel, gyro):
-            print("Accel:", accel)
-            print("Gyro:", gyro)
+            global Accel
+            global Gyro
+            Accel=accel
+            Gyro=gyro
+            #print("Accel:", accel)
+            #print("Gyro:", gyro)
         k.gpioSetInputCallback(pin_change_cb)
-        await k.gpioConfigSet([(0x81,True,KonashiGpioPinConfig(KONASHI_GPIO_DIRECTION_IN,send_on_change=True)), (0x1E,True,KonashiGpioPinConfig(KONASHI_GPIO_DIRECTION_OUT,send_on_change=False))])
+        await k.gpioConfigSet([(0x01,True,KonashiGpioPinConfig(KONASHI_GPIO_DIRECTION_IN,send_on_change=True)), (0x1E,True,KonashiGpioPinConfig(KONASHI_GPIO_DIRECTION_OUT,send_on_change=False))])
         await k.builtinSetTemperatureCallback(temperature_cb)
         await k.builtinSetHumidityCallback(humidity_cb)
         await k.builtinSetPressureCallback(pressure_cb)
@@ -596,54 +610,113 @@ if __name__ == "__main__":
         await k.builtinSetAccelGyroCallback(accelgyro_cb)
         await asyncio.sleep(1)
 
-        i=j=0
+        i=0
+        LED=0
         button=0
         stickerID=5
+        Presence=False
+        SendFlag=False
+        Buttoncount=0
+        ButtonFlag=False
+        Home=True
+        Alert=False
+        prei=i
         while(True):
-            #print(button,i)
-            await k.gpioControl([(~(j<<1),KONASHI_GPIO_LEVEL_LOW), (j<<1,KONASHI_GPIO_LEVEL_HIGH)])
-            j+=1
-            if j>15:
+
+            if Presence:
+                if Home:
+                    if SendFlag ==False:
+                        bot.send(
+                            message="\n"+comment+"\n気温 "+str(Temp)+"[℃]\n湿度 "+str(Hum)+"[%]\n気圧 "+str(Press)+"[hPa]\nWBGT "+str(round(wbgt,2))+"[℃]\n標高 約"+str(round(h,1))+"[m]",
+                            sticker_package_id=1,
+                            sticker_id=stickerID,
+                            )
+                        SendFlag=True
+                    await k.builtinSetRgb(255,255,255, 255, 1000)
+                else:
+                    if SendFlag ==False:
+                        bot.send(
+                            message="\n[Warning!]\n家に誰かいる!!\n",
+                            sticker_package_id=1,
+                            sticker_id=3,
+                            )
+                        SendFlag=True
+                        prei=i
+                    Alert=True
+            else:
+                if Alert==False:
+                    await k.builtinSetRgb(0,0,0, 255, 1000)
+                SendFlag=False
+
+            if i%3==1:
                 comment=""
                 h=pressuretom(Press)
                 wbgt=WBGT(Temp,Hum)
                 if wbgt>31:#危険
+                    LED=15
                     comment="危険 熱中症に注意！外出はなるべく避けよう"
                     stickerID=6
                 elif wbgt>28:#厳重警戒
+                    LED=14
                     comment="厳重警戒 熱中症に注意！炎天下はなるべく避けよう"
                     stickerID=3
                 elif wbgt>25:#警戒
+                    LED=12
                     comment="警戒　運動や激しい作業をする際はこまめに休憩しよう"
                     stickerID=8
                 elif wbgt>21:#注意
+                    LED=8
                     comment="注意　激しい運動や重労働時は熱中症に気をつけよう"
                     stickerID=17
                 elif Hum>50 or Press <1000:#雨？
+                    LED=0
                     comment="雨かも"
                     stickerID=9
                 else:#ほぼ安全
+                    LED=0
                     comment="快適～♪"
                     sticker=[2,5,13]
                     rnum=random.randint(0,2)
                     stickerID=sticker[rnum]
+                await k.gpioControl([(~(LED<<1),KONASHI_GPIO_LEVEL_LOW), (LED<<1,KONASHI_GPIO_LEVEL_HIGH)])
+                if Alert:
+                    await k.builtinSetRgb(255,0,0, 255, 1)
+            else:
+                if Alert:
+                    await k.builtinSetRgb(0,0,0, 255, 1)
+                    if (i-prei)>8:
+                        Alert=False
 
-                bot.send(
-                    message="\n"+comment+"\n気温 "+str(Temp)+"[℃]\n湿度 "+str(Hum)+"[%]\n気圧 "+str(Press)+"[hPa]\nWBGT "+str(round(wbgt,2))+"[℃]\n標高 約"+str(round(h,1))+"[m]",
-                    sticker_package_id=1,
-                    sticker_id=stickerID,
-                    )
-                j=0
-            await k.builtinSetRgb(255 if i%3==0 else 0, 255 if i%3==1 else 0, 255 if i%3==2 else 0, 255, 1000)
-            await asyncio.sleep(1)
             i+=1
             if button:
-                break
+                ButtonFlag=True
+                Buttoncount+=1
+                if Buttoncount > 10:
+                    break
+            else:
+                if ButtonFlag:
+                    Home=not Home
+                    print("Home:",Home)
+                    if Home == False:
+                        bot.send(
+                            message="セキュリティーモード起動!\nいってらっしゃ～い",
+                            sticker_package_id=1,
+                            sticker_id=12,
+                            )
+                    else:
+                        bot.send(
+                            message="セキュリティーモード終了!\nおかえりなさい",
+                            sticker_package_id=1,
+                            sticker_id=13,
+                            )
+                    ButtonFlag=False
+            await asyncio.sleep(1)
 
         await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_LOW)])
         await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_HIGH)])
         await asyncio.sleep(2)
         await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_LOW)])
+        await k.builtinSetRgb(0,0,0, 255, 1000)
         await k.disconnect()
 
         print("Disconnected")
