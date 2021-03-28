@@ -617,6 +617,7 @@ if __name__ == "__main__":
         LED=0
         button=0
         stickerID=5
+        packageID=1
         Presence=False
         SendFlag=False
         Buttoncount=0
@@ -629,12 +630,12 @@ if __name__ == "__main__":
         B=255
         while(True):
 
-            if Presence:
+            if Presence and button==False:
                 if Home:
                     if SendFlag ==False:
                         bot.send(
                             message="\n"+comment+"\n気温 "+str(Temp)+"[℃]\n湿度 "+str(Hum)+"[%]\n気圧 "+str(Press)+"[hPa]\nWBGT "+str(round(wbgt,2))+"[℃]\n標高 約"+str(round(h,1))+"[m]",
-                            sticker_package_id=1,
+                            sticker_package_id=packageID,
                             sticker_id=stickerID,
                             )
                         SendFlag=True
@@ -671,28 +672,57 @@ if __name__ == "__main__":
                 if wbgt>31:#危険
                     LED=15
                     comment="危険 熱中症に注意！外出はなるべく避けよう"
-                    stickerID=6
+                    packageID=1
+                    stickerID=21
                 elif wbgt>28:#厳重警戒
                     LED=14
                     comment="厳重警戒 熱中症に注意！炎天下はなるべく避けよう"
-                    stickerID=3
+                    packageID=1
+                    stickerID=422
                 elif wbgt>25:#警戒
                     LED=12
                     comment="警戒　運動や激しい作業をする際はこまめに休憩しよう"
-                    stickerID=8
+                    packageID=2
+                    stickerID=27
                 elif wbgt>21:#注意
                     LED=8
                     comment="注意　激しい運動や重労働時は熱中症に気をつけよう"
-                    stickerID=17
-                elif Hum>50 or Press <1000:#雨？
+                    packageID=2
+                    stickerID=31
+                elif Temp<14:#寒い
                     LED=0
-                    comment="雨かも"
-                    stickerID=9
+                    comment="寒イ.."
+                    packageID=2
+                    stickerID=29
+                elif Hum>60:#湿度高め
+                    LED=0
+                    comment="湿度が高め\n雨降ってる？\n最適湿度は40~60％だよ"
+                    sticker=[9,507]
+                    rnum=random.randint(0,1)
+                    if rnum>0:
+                        packageID=2
+                    else:
+                        packageID=1
+                    stickerID=sticker[rnum]
+                elif Hum<30:#乾燥してる
+                    LED=0
+                    comment="乾燥してるよ\n加湿器つけよう！\n最適湿度は40~60％だよ"
+                    packageID=2
+                    stickerID=24
+                elif Hum<40:#少し乾燥してる
+                    LED=0
+                    comment="少し乾燥してるよ\n加湿器つけたほうがいいかも\n最適湿度は40~60％だよ"
+                    packageID=1
+                    stickerID=15
                 else:#ほぼ安全
                     LED=0
                     comment="快適～♪"
-                    sticker=[2,5,13]
-                    rnum=random.randint(0,2)
+                    sticker=[2,5,13,103,26,140,141,142,501,513]
+                    rnum=random.randint(0,9)
+                    if rnum>3:
+                        packageID=2
+                    else:
+                        packageID=1
                     stickerID=sticker[rnum]
                 await k.gpioControl([(~(LED<<1),KONASHI_GPIO_LEVEL_LOW), (LED<<1,KONASHI_GPIO_LEVEL_HIGH)])
                 if Alert:
@@ -717,13 +747,13 @@ if __name__ == "__main__":
                         bot.send(
                             message="セキュリティーモード起動!\nいってらっしゃ～い",
                             sticker_package_id=1,
-                            sticker_id=12,
+                            sticker_id=408,
                             )
                     else:
                         bot.send(
                             message="セキュリティーモード終了!\nおかえりなさい",
-                            sticker_package_id=1,
-                            sticker_id=13,
+                            sticker_package_id=2,
+                            sticker_id=143,
                             )
                     Alert=False
                     ButtonFlag=False
