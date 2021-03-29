@@ -628,27 +628,22 @@ if __name__ == "__main__":
         R=255
         G=255
         B=255
+        mode=0
+        oldmode=0
         while(True):
 
             if Presence and button==False:
                 if Home:
-                    if SendFlag ==False:
-                        bot.send(
-                            message="\n"+comment+"\n気温 "+str(Temp)+"[℃]\n湿度 "+str(Hum)+"[%]\n気圧 "+str(Press)+"[hPa]\nWBGT "+str(round(wbgt,2))+"[℃]\n標高 約"+str(round(h,1))+"[m]",
-                            sticker_package_id=packageID,
-                            sticker_id=stickerID,
-                            )
-                        SendFlag=True
-                        R=int(map(Temp,0,45,0,255))
-                        B=int(map(Hum,0,100,0,255))
-                        G=int(map(Press,870,1400,0,255))#観測記録　min 870 max 1093.0[hPa]
-                        if R>255:
-                            R=255
-                        if B>255:
-                            B=255
-                        if G>255:
-                            G=255
-                        print(R,G,B)
+                    R=int(map(Temp,0,45,0,255))
+                    B=int(map(Hum,0,100,0,255))
+                    G=int(map(Press,870,1400,0,255))#観測記録　min 870 max 1093.0[hPa]
+                    if R>255:
+                        R=255
+                    if B>255:
+                        B=255
+                    if G>255:
+                        G=255
+                    print(R,G,B)
                     await k.builtinSetRgb(R,G,B, 255, 1000)
                 else:
                     if SendFlag ==False:
@@ -670,31 +665,37 @@ if __name__ == "__main__":
                 h=pressuretom(Press)
                 wbgt=WBGT(Temp,Hum)
                 if wbgt>31:#危険
+                    mode=8
                     LED=15
                     comment="危険 熱中症に注意！外出はなるべく避けよう"
                     packageID=1
                     stickerID=21
                 elif wbgt>28:#厳重警戒
+                    mode=7
                     LED=14
                     comment="厳重警戒 熱中症に注意！炎天下はなるべく避けよう"
                     packageID=1
                     stickerID=422
                 elif wbgt>25:#警戒
+                    mode=6
                     LED=12
                     comment="警戒　運動や激しい作業をする際はこまめに休憩しよう"
                     packageID=2
                     stickerID=27
                 elif wbgt>21:#注意
+                    mode=5
                     LED=8
                     comment="注意　激しい運動や重労働時は熱中症に気をつけよう"
                     packageID=2
                     stickerID=31
                 elif Temp<14:#寒い
+                    mode=4
                     LED=0
                     comment="寒イ.."
                     packageID=2
                     stickerID=29
                 elif Hum>60:#湿度高め
+                    mode=3
                     LED=0
                     comment="湿度が高め\n雨降ってる？\n最適湿度は40~60％だよ"
                     sticker=[9,507]
@@ -705,16 +706,19 @@ if __name__ == "__main__":
                         packageID=1
                     stickerID=sticker[rnum]
                 elif Hum<30:#乾燥してる
+                    mode=2
                     LED=0
                     comment="乾燥してるよ\n加湿器つけよう！\n最適湿度は40~60％だよ"
                     packageID=2
                     stickerID=24
                 elif Hum<40:#少し乾燥してる
+                    mode=1
                     LED=0
                     comment="少し乾燥してるよ\n加湿器つけたほうがいいかも\n最適湿度は40~60％だよ"
                     packageID=1
                     stickerID=15
                 else:#ほぼ安全
+                    mode=0
                     LED=0
                     comment="快適～♪"
                     sticker=[2,5,13,103,26,140,141,142,501,513]
@@ -732,6 +736,14 @@ if __name__ == "__main__":
                     await k.builtinSetRgb(0,0,0, 255, 1)
                     if (i-prei)>8:
                         Alert=False
+
+            if  oldmode != mode:
+                oldmode=mode
+                bot.send(
+                    message="\n"+comment+"\n気温 "+str(Temp)+"[℃]\n湿度 "+str(Hum)+"[%]\n気圧 "+str(round(Press,1))+"[hPa]\nWBGT "+str(round(wbgt,2))+"[℃]\n標高 約"+str(round(h,1))+"[m]",
+                    sticker_package_id=packageID,
+                    sticker_id=stickerID,
+                    )
 
             i+=1
             if button:
