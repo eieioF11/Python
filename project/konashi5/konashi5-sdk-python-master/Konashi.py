@@ -643,7 +643,7 @@ if __name__ == "__main__":
                         B=255
                     if G>255:
                         G=255
-                    print(R,G,B)
+                    print(R,G,B,Temp,Hum,Press)
                     await k.builtinSetRgb(R,G,B, 255, 1000)
                 else:
                     if SendFlag ==False:
