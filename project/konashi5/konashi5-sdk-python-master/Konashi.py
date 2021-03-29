@@ -629,7 +629,7 @@ if __name__ == "__main__":
         G=255
         B=255
         mode=0
-        oldmode=0
+        oldmode=-1
         while(True):
 
             if Presence and button==False:
