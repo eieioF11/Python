@@ -660,7 +660,7 @@ if __name__ == "__main__":
                     await k.builtinSetRgb(0,0,0, 255, 1000)
                 SendFlag=False
 
-            if i%3==1:
+            if i%3==1 or oldmode==-1:
                 comment=""
                 h=pressuretom(Press)
                 wbgt=WBGT(Temp,Hum)
