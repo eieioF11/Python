@@ -773,7 +773,7 @@ if __name__ == "__main__":
             if button:
                 ButtonFlag=True
                 Buttoncount+=1
-                if Buttoncount > 10:
+                if Buttoncount > 3:
                     break
             else:
                 if ButtonFlag:
