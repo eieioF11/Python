@@ -1,14 +1,21 @@
+#グラフ上で右クリックすると終了
 import matplotlib.pyplot as plt
 from SerialConnection import select_port
 import numpy as np
 import datetime
 
-import ctypes
+global end
 
-def getkey(key):
-    return(bool(ctypes.windll.user32.GetAsyncKeyState(key) & 0x8000))
+def onclick(event):
+    global end
+    end=False
+    #print(event.button, event.x, event.y, event.xdata, event.ydata)
+    if event.button==3:
+        end=True
 
 def main():
+    global end
+    end=False
     print("Start!")
 
     #Serial portの選択
@@ -33,10 +40,10 @@ def main():
     X3, Y3 = [], []
     X4, Y4 = [], []
 
-    ESC = 0x1B          # ESCキーの仮想キーコード
+    cid = fig.canvas.mpl_connect('button_press_event', onclick)
 
     while True:
-        if getkey(ESC):     # ESCキーが押されたら終了
+        if end==True:     # ESCキーが押されたら終了
             break
         try:
             ser.reset_input_buffer()#受信バッファをクリア
@@ -118,6 +125,7 @@ def main():
                 ax3.set_xlim(xlim[0], xlim[1])
                 ax4.set_xlim(xlim[0], xlim[1])
                 #plt.xlim(xlim[0], xlim[1])
+                #テキスト表示
                 ax1_pos = ax1.get_position()
                 ax2_pos = ax2.get_position()
                 ax3_pos = ax3.get_position()
@@ -126,6 +134,7 @@ def main():
                 fig.text(ax2_pos.x1 - 0.1, ax2_pos.y1 - 0.05,str(round(temp,1))+"[deg]")
                 fig.text(ax3_pos.x1 - 0.1, ax3_pos.y1 - 0.05,str(round(hum,1))+"[%]")
                 fig.text(ax4_pos.x1 - 0.12, ax4_pos.y1 - 0.05,str(round(press,1))+"[hPa]")
+                fig.text(0.4,0.95,"Right click to finish",color="red",fontsize=15)
                 #タイトル表示
                 ax1.set_title('Weight[kg]')
                 ax2.set_title('Temperature[deg]')
@@ -139,7 +148,6 @@ def main():
 
     print("End")
     ser.close()
-
 
 if __name__ == "__main__":
     main()
