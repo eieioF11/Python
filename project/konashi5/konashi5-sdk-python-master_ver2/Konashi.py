@@ -791,6 +791,7 @@ if __name__ == "__main__":
                             sticker_package_id=2,
                             sticker_id=143,
                             )
+                        oldmode=-1
                     Alert=False
                     ButtonFlag=False
                     Buttoncount=0
