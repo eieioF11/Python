@@ -23,10 +23,6 @@ def main():
         f.write("時刻,"+"重量[kg],"+"気温[℃],"+"湿度[%],"+"気圧[hPa],\n")#ログの書き込み
 
     fig = plt.figure(figsize=(8.0, 7.5))
-    ax1 = fig.add_subplot(2, 2, 1)
-    ax2 = fig.add_subplot(2, 2, 2)
-    ax3 = fig.add_subplot(2, 2, 3)
-    ax4 = fig.add_subplot(2, 2, 4)
 
     #x軸の幅を100にする
     xlim = [0, 10]
@@ -80,6 +76,12 @@ def main():
 
                 #画面をクリア
                 plt.cla()
+                plt.clf()
+
+                ax1 = fig.add_subplot(2, 2, 1)
+                ax2 = fig.add_subplot(2, 2, 2)
+                ax3 = fig.add_subplot(2, 2, 3)
+                ax4 = fig.add_subplot(2, 2, 4)
 
                 ax1.grid(True)
                 ax2.grid(True)
@@ -120,10 +122,10 @@ def main():
                 ax2_pos = ax2.get_position()
                 ax3_pos = ax3.get_position()
                 ax4_pos = ax4.get_position()
-                fig.text(ax1_pos.x1 - 0.1, ax1_pos.y1 - 0.05,str(round(m,1))+"[kg]  ",backgroundcolor="white")
-                fig.text(ax2_pos.x1 - 0.1, ax2_pos.y1 - 0.05,str(round(temp,1))+"[deg]  ",backgroundcolor="white")
-                fig.text(ax3_pos.x1 - 0.1, ax3_pos.y1 - 0.05,str(round(hum,1))+"[%]  ",backgroundcolor="white")
-                fig.text(ax4_pos.x1 - 0.1, ax4_pos.y1 - 0.05,str(round(press,1))+"[hPa]  ",backgroundcolor="white")
+                fig.text(ax1_pos.x1 - 0.1, ax1_pos.y1 - 0.05,str(round(m,1))+"[kg]")
+                fig.text(ax2_pos.x1 - 0.1, ax2_pos.y1 - 0.05,str(round(temp,1))+"[deg]")
+                fig.text(ax3_pos.x1 - 0.1, ax3_pos.y1 - 0.05,str(round(hum,1))+"[%]")
+                fig.text(ax4_pos.x1 - 0.12, ax4_pos.y1 - 0.05,str(round(press,1))+"[hPa]")
                 #タイトル表示
                 ax1.set_title('Weight[kg]')
                 ax2.set_title('Temperature[deg]')
