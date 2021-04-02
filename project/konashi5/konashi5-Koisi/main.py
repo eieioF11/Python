@@ -2,9 +2,9 @@ from Konashi import *
 from line_notify_bot import LINENotifyBot
 import random
 
-
 if __name__ == "__main__":
     async def main():
+        #初期設定
         global button
         global Temp
         global Hum
@@ -107,9 +107,9 @@ if __name__ == "__main__":
                 else:
                     packageID=1
                 stickerID=sticker[rnum]
-
+        #LINE設定
         bot = LINENotifyBot(access_token='UilHhgEr7klUFPxhWyHdxYrJDbomRgXxLWeeNJsFyqY')
-
+        #Konashi設定
         k = Konashi(name="ksAB1A08")
         k2 = Konashi(name="ksAB0FF0")
 
@@ -191,6 +191,7 @@ if __name__ == "__main__":
         B=255
         mode=0
         oldmode=-1
+        #メイン処理
         while(True):
 
             if (Presence[0] or Presence[1]) and button==False:
@@ -204,7 +205,7 @@ if __name__ == "__main__":
                         B=255
                     if G>255:
                         G=255
-                    print(R,G,B,Temp,Hum,Press)
+                    print("RGB(%d,%d,%d),Temp:%f,Hum:%f,Press:%f" %(R,G,B,Temp,Hum,Press))
                     t={}
                     if Presence[0]:
                         t[0]=500
@@ -289,6 +290,7 @@ if __name__ == "__main__":
                     Buttoncount=0
             await asyncio.sleep(1)
 
+        #終了処理
         await k.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_LOW)])
         await k2.gpioControl([(0x1E,KONASHI_GPIO_LEVEL_LOW)])
 
