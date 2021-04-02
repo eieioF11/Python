@@ -29,7 +29,12 @@ if __name__ == "__main__":
             return 0.725*T+0.0368*H+0.00364*T*H-3.246
 
         def map(x,in_min,in_max,out_min,out_max):
-            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+            value=(x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+            if value>out_max:
+                value=out_max
+            if value<out_min:
+                value=out_min
+            return value
 
         def Room_condition(Temp,Hum,Press):
             global comment
@@ -107,6 +112,7 @@ if __name__ == "__main__":
                 else:
                     packageID=1
                 stickerID=sticker[rnum]
+
         #LINE設定
         bot = LINENotifyBot(access_token='UilHhgEr7klUFPxhWyHdxYrJDbomRgXxLWeeNJsFyqY')
         #Konashi設定
@@ -191,6 +197,8 @@ if __name__ == "__main__":
         B=255
         mode=0
         oldmode=-1
+        t={}
+        t[0]=t[1]=1000
         #メイン処理
         while(True):
 
@@ -199,20 +207,13 @@ if __name__ == "__main__":
                     R=int(map(Temp,0,45,0,255))
                     B=int(map(Hum,0,100,0,255))
                     G=int(map(Press,870,1400,0,255))#観測記録　min 870 max 1093.0[hPa]
-                    if R>255:
-                        R=255
-                    if B>255:
-                        B=255
-                    if G>255:
-                        G=255
                     print("RGB(%d,%d,%d),Temp:%f,Hum:%f,Press:%f" %(R,G,B,Temp,Hum,Press))
-                    t={}
                     if Presence[0]:
-                        t[0]=500
-                        t[1]=1500
-                    elif Presence[1]:
                         t[0]=1500
                         t[1]=500
+                    elif Presence[1]:
+                        t[0]=500
+                        t[1]=1500
                     else:
                         t[0]=1000
                         t[1]=1000
@@ -236,8 +237,8 @@ if __name__ == "__main__":
                     Alert=True
             else:
                 if Alert==False:
-                    await k.builtinSetRgb(0,0,0, 255, 1000)
-                    await k2.builtinSetRgb(0,0,0, 255, 500)
+                    await k.builtinSetRgb(0,0,0, 255, t[0])
+                    await k2.builtinSetRgb(0,0,0, 255, t[1])
                 SendFlag=False
 
             if i%3==1 or oldmode==-1:
