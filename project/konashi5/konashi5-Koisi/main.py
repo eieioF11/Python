@@ -220,9 +220,9 @@ if __name__ == "__main__":
                     await k.builtinSetRgb(R,G,B, 255, t[0])
                     await k2.builtinSetRgb(R,G,B, 255, t[1])
                 else:
-                    if Presence[0]:
+                    if Presence[0] and Presence[1] == False :
                         comment="デバイス1に反応あり!!\n"
-                    elif Presence[1]:
+                    elif Presence[1] and Presence[0]==False :
                         comment="デバイス2に反応あり!!\n"
                     else:
                         comment="両方のデバイスに反応あり!!!"
