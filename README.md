@@ -17,6 +17,7 @@ otherフォルダにあるpython-3.7.3-amd64.exeもしくはpython-3.7.3.exeを�
 pip install ライブラリー名
 ```
 でインストールする
+
 例　MeCabライブラリーをインストールする場合
 ```bash
 pip install MeCab
@@ -26,6 +27,7 @@ OpenCVライブラリーのインストール
 pip install opencv-python
 ```
 PyAudioのインストール
+
 32bitのpython3.7を使用する場合
 ```bash
 pip install PyAudio-0.2.11-cp37-cp37m-win32.whl
@@ -35,13 +37,16 @@ pip install PyAudio-0.2.11-cp37-cp37m-win32.whl
 pip install PyAudio-0.2.11-cp37-cp37m-win_amd64.whl
 ```
 OpenGLのインストール
+
 32bitのpython3.7を使用する場合
+
 otherフォルダのOpenGL_32bitフォルダに移動して以下のコマンドを入力
 ```bash
 pip install PyOpenGL-3.1.5-cp37-cp37m-win32.whl
 pip install PyOpenGL_accelerate-3.1.5-cp37-cp37m-win32.whl
 ```
 64bitのpython3.7を使用する場合
+
 otherフォルダのOpenGL_64bitフォルダに移動して以下のコマンドを入力
 ```bash
 pip install PyOpenGL-3.1.5-cp37-cp37m-win_amd64.whl
