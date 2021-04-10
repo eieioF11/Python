@@ -57,7 +57,10 @@ pip install PyOpenGL_accelerate-3.1.5-cp37-cp37m-win_amd64.whl
 # Reference site
 LINE Notify
 https://qiita.com/moriita/items/5b199ac6b14ceaa4f7c9
+
 OpenGL
+
 https://qiita.com/emuai/items/1dd61ffa1b69643a9ca3
+
 https://shizenkarasuzon.hatenablog.com/entry/2018/12/29/095702
 
