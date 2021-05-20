@@ -22,6 +22,9 @@ def init():
     """ initialize """
     glClearColor(0.5, 0.5, 0.5, 1.0)#背景色(灰色)
     glEnable(GL_DEPTH_TEST)#デプスバッファ有効
+    glEnable(GL_CULL_FACE)#カーリングの削除
+    #glCullFace(GL_BACK)#裏面消去
+    glCullFace(GL_FRONT)#表面消去
 
 #正方形
 vertex = [#点
